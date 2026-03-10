@@ -1,0 +1,11 @@
+name: set
+version: 0.1.0
+homepage: https://github.com/morloclib/set
+synopsis: Set type and operations
+description: Unordered collections of unique elements with set-theoretic operations.
+category: data
+license: MIT
+author: "Zebulun Arendsee"
+maintainer: "z@morloc.io"
+github: https://github.com/morloclib/set
+bug-reports: https://github.com/morloclib/set
