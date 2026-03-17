@@ -22,49 +22,49 @@ instance Monoid (Set a)
 -- typeclass instances. These derivations, though, are likely inefficient and
 -- most languages should over-ride them.
 
-member a :: a -> Set a -> Bool
+member :: a -> Set a -> Bool
 
-insertSet a :: a -> Set a -> Set a
+insertSet :: a -> Set a -> Set a
 
-deleteSet a :: a -> Set a -> Set a
+deleteSet :: a -> Set a -> Set a
 
 -- Construction
 
-singleton a :: a -> Set a
+singleton :: a -> Set a
 
-fromList a :: [a] -> Set a
+fromList :: [a] -> Set a
 fromList = pack
 
-toList a :: Set a -> [a]
+toList :: Set a -> [a]
 toList = unpack
 
 -- Query
 
-size a :: Set a -> Int
+size :: Set a -> Int
 size = fold (\n x -> n + 1) 0
 
 -- Set-theoretic operations
 
-union a :: Set a -> Set a -> Set a
+union :: Set a -> Set a -> Set a
 union a b = fold (\s x -> insertSet x s) a b
 
-intersection a :: Set a -> Set a -> Set a
+intersection :: Set a -> Set a -> Set a
 
-difference a :: Set a -> Set a -> Set a
+difference :: Set a -> Set a -> Set a
 
-symmetricDifference a :: Set a -> Set a -> Set a
+symmetricDifference :: Set a -> Set a -> Set a
 symmetricDifference a b = union (difference a b) (difference b a)
 
 -- Predicates
 
-isSubset a :: Set a -> Set a -> Bool
+isSubset :: Set a -> Set a -> Bool
 isSubset a b = fold (\acc x -> acc && member x b) True a
 
-isDisjoint a :: Set a -> Set a -> Bool
+isDisjoint :: Set a -> Set a -> Bool
 isDisjoint a b = fold (\acc x -> acc && not (member x b)) True a
 
 -- Transform
 
-filterSet a :: (a -> Bool) -> Set a -> Set a
+filterSet :: (a -> Bool) -> Set a -> Set a
 
-mapSet a b :: (a -> b) -> Set a -> Set b
+mapSet :: (a -> b) -> Set a -> Set b
