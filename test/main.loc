@@ -1,0 +1,177 @@
+module set.test (test)
+
+import set
+import root
+
+type Py => Int = "int"
+type Py => Str = "str"
+type Py => Real = "float"
+type Py => Bool = "bool"
+type Py => Tuple2 a b = "tuple" a b
+type Py => List a = "list" a
+
+-------------------------------------------------------------------------------
+-- Test suite functions
+
+source Py from "set-test.py" ("testEqual", "printMsg", "printResult")
+testEqual
+    :: Str -- description of the test
+    -> a
+    -> a
+    -> (Int, Int) -- total number of tests and total fails
+    -> (Int, Int)
+printMsg :: Str -> a -> a
+printResult :: (Int, Int) -> (Int, Int)
+
+testGroup
+    :: Str
+    -> ((Int, Int) -> (Int, Int))
+    -> (Int, Int)
+    -> (Int, Int)
+testGroup msg tests = tests . printMsg msg
+
+passed :: (Int, Int) -> Bool
+passed t = 0 == (.0 t)
+
+test = runTests (0,0)
+
+-------------------------------------------------------------------------------
+-- Test suite
+
+runTests :: (Int, Int) -> Bool
+runTests =
+  ( passed
+  . printResult
+  . testGroup "Set Monoid" testMonoid
+  . testGroup "Set Semigroup" testSemigroup
+  . testGroup "Set Foldable" testFoldable
+  . testGroup "Set Transform" testTransform
+  . testGroup "Set Predicates" testPredicates
+  . testGroup "Set Operations" testOperations
+  . testGroup "Set Modify" testModify
+  . testGroup "Set Query" testQuery
+  . testGroup "Set Construction" testConstruction
+  )
+
+-------------------------------------------------------------------------------
+-- Construction
+
+testConstruction :: (Int, Int) -> (Int, Int)
+testConstruction =
+  ( testEqual "fromList" (sort (toList (fromList [3,1,2]))) [1,2,3]
+  . testEqual "fromList empty" (sort (toList (fromList ([] :: [Int])))) ([] :: [Int])
+  . testEqual "fromList dedup" (sort (toList (fromList [1,2,1,3,2]))) [1,2,3]
+  . testEqual "singleton" (toList (singleton 42)) [42]
+  . testEqual "toList fromList" (sort (toList (fromList [1,2,3]))) [1,2,3]
+  )
+
+-------------------------------------------------------------------------------
+-- Query
+
+testQuery :: (Int, Int) -> (Int, Int)
+testQuery =
+  ( testEqual "member found" (member 2 (fromList [1,2,3])) True
+  . testEqual "member missing" (member 4 (fromList [1,2,3])) False
+  . testEqual "member empty" (member 1 (fromList ([] :: [Int]))) False
+  . testEqual "size 0" (size (fromList ([] :: [Int]))) 0
+  . testEqual "size 1" (size (singleton 1)) 1
+  . testEqual "size 3" (size (fromList [1,2,3])) 3
+  . testEqual "size dedup" (size (fromList [1,2,1,3,2])) 3
+  )
+
+-------------------------------------------------------------------------------
+-- Modify
+
+testModify :: (Int, Int) -> (Int, Int)
+testModify =
+  ( testEqual "insertSet new" (sort (toList (insertSet 4 (fromList [1,2,3])))) [1,2,3,4]
+  . testEqual "insertSet dup" (sort (toList (insertSet 2 (fromList [1,2,3])))) [1,2,3]
+  . testEqual "insertSet empty" (sort (toList (insertSet 1 (fromList ([] :: [Int]))))) [1]
+  . testEqual "deleteSet" (sort (toList (deleteSet 2 (fromList [1,2,3])))) [1,3]
+  . testEqual "deleteSet missing" (sort (toList (deleteSet 4 (fromList [1,2,3])))) [1,2,3]
+  . testEqual "deleteSet to empty" (sort (toList (deleteSet 1 (singleton 1)))) ([] :: [Int])
+  . testEqual "insert then delete" (sort (toList (deleteSet 4 (insertSet 4 (fromList [1,2,3]))))) [1,2,3]
+  )
+
+-------------------------------------------------------------------------------
+-- Set Operations
+
+testOperations :: (Int, Int) -> (Int, Int)
+testOperations =
+  ( testEqual "union disjoint" (sort (toList (union (fromList [1,2]) (fromList [3,4])))) [1,2,3,4]
+  . testEqual "union overlap" (sort (toList (union (fromList [1,2,3]) (fromList [2,3,4])))) [1,2,3,4]
+  . testEqual "union empty left" (sort (toList (union (fromList ([] :: [Int])) (fromList [1,2])))) [1,2]
+  . testEqual "union empty right" (sort (toList (union (fromList [1,2]) (fromList ([] :: [Int]))))) [1,2]
+  . testEqual "intersection" (sort (toList (intersection (fromList [1,2,3]) (fromList [2,3,4])))) [2,3]
+  . testEqual "intersection disjoint" (sort (toList (intersection (fromList [1,2]) (fromList [3,4])))) ([] :: [Int])
+  . testEqual "intersection empty" (sort (toList (intersection (fromList ([] :: [Int])) (fromList [1,2])))) ([] :: [Int])
+  . testEqual "difference" (sort (toList (difference (fromList [1,2,3]) (fromList [2,3,4])))) [1]
+  . testEqual "difference disjoint" (sort (toList (difference (fromList [1,2]) (fromList [3,4])))) [1,2]
+  . testEqual "difference all" (sort (toList (difference (fromList [1,2]) (fromList [1,2,3])))) ([] :: [Int])
+  . testEqual "difference empty right" (sort (toList (difference (fromList [1,2]) (fromList ([] :: [Int]))))) [1,2]
+  . testEqual "symDiff" (sort (toList (symmetricDifference (fromList [1,2,3]) (fromList [2,3,4])))) [1,4]
+  . testEqual "symDiff equal" (sort (toList (symmetricDifference (fromList [1,2]) (fromList [1,2])))) ([] :: [Int])
+  . testEqual "symDiff disjoint" (sort (toList (symmetricDifference (fromList [1,2]) (fromList [3,4])))) [1,2,3,4]
+  )
+
+-------------------------------------------------------------------------------
+-- Predicates
+
+testPredicates :: (Int, Int) -> (Int, Int)
+testPredicates =
+  ( testEqual "isSubset true" (isSubset (fromList [1,2]) (fromList [1,2,3])) True
+  . testEqual "isSubset false" (isSubset (fromList [1,4]) (fromList [1,2,3])) False
+  . testEqual "isSubset equal" (isSubset (fromList [1,2]) (fromList [1,2])) True
+  . testEqual "isSubset empty" (isSubset (fromList ([] :: [Int])) (fromList [1,2])) True
+  . testEqual "isDisjoint true" (isDisjoint (fromList [1,2]) (fromList [3,4])) True
+  . testEqual "isDisjoint false" (isDisjoint (fromList [1,2]) (fromList [2,3])) False
+  . testEqual "isDisjoint empty" (isDisjoint (fromList ([] :: [Int])) (fromList [1,2])) True
+  )
+
+-------------------------------------------------------------------------------
+-- Transform
+
+testTransform :: (Int, Int) -> (Int, Int)
+testTransform =
+  ( testEqual "filterSet" (sort (toList (filterSet (_ > 2) (fromList [1,2,3,4])))) [3,4]
+  . testEqual "filterSet none" (sort (toList (filterSet (_ > 9) (fromList [1,2,3])))) ([] :: [Int])
+  . testEqual "filterSet all" (sort (toList (filterSet (_ > 0) (fromList [1,2,3])))) [1,2,3]
+  . testEqual "mapSet" (sort (toList (mapSet (_ * 2) (fromList [1,2,3])))) [2,4,6]
+  . testEqual "mapSet dedup" (size (mapSet (_ // 2) (fromList [1,2,3,4]))) 3
+  )
+
+-------------------------------------------------------------------------------
+-- Foldable
+
+testFoldable :: (Int, Int) -> (Int, Int)
+testFoldable =
+  ( testEqual "fold sum" (fold (+) 0 (fromList [1,2,3])) 6
+  . testEqual "fold empty" (fold (+) 0 (fromList ([] :: [Int]))) 0
+  . testEqual "fold count" (fold (\n x -> n + 1) 0 (fromList [1,2,3])) 3
+  . testEqual "fold1 sum" (fold1 (+) (fromList [1,2,3])) 6
+  . testEqual "fold1 single" (fold1 (+) (fromList [42])) 42
+  . testEqual "safeFold1 sum" (safeFold1 (+) (fromList [1,2,3])) 6
+  . testEqual "safeFold1 empty" (safeFold1 (+) (fromList ([] :: [Int]))) (Null :: ?Int)
+  )
+
+-------------------------------------------------------------------------------
+-- Semigroup
+
+testSemigroup :: (Int, Int) -> (Int, Int)
+testSemigroup =
+  ( testEqual "append" (sort (toList ((fromList [1,2]) <> (fromList [2,3])))) [1,2,3]
+  . testEqual "append disjoint" (sort (toList ((fromList [1,2]) <> (fromList [3,4])))) [1,2,3,4]
+  . testEqual "append empty left" (sort (toList ((fromList ([] :: [Int])) <> (fromList [1,2])))) [1,2]
+  . testEqual "append empty right" (sort (toList ((fromList [1,2]) <> (fromList ([] :: [Int]))))) [1,2]
+  )
+
+-------------------------------------------------------------------------------
+-- Monoid
+
+testMonoid :: (Int, Int) -> (Int, Int)
+testMonoid =
+  ( testEqual "mempty size" (size (mempty :: Set Int)) 0
+  . testEqual "mempty toList" (sort (toList (mempty :: Set Int))) ([] :: [Int])
+  . testEqual "append mempty left" (sort (toList (mempty <> (fromList [1,2])))) [1,2]
+  . testEqual "append mempty right" (sort (toList ((fromList [1,2]) <> mempty))) [1,2]
+  )
