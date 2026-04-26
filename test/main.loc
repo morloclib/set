@@ -133,11 +133,11 @@ testPredicates =
 
 testTransform :: (Int, Int) -> (Int, Int)
 testTransform =
-  ( testEqual "filterSet" (sort (toList (filterSet (_ > 2) (fromList [1,2,3,4])))) [3,4]
-  . testEqual "filterSet none" (sort (toList (filterSet (_ > 9) (fromList [1,2,3])))) ([] :: [Int])
-  . testEqual "filterSet all" (sort (toList (filterSet (_ > 0) (fromList [1,2,3])))) [1,2,3]
-  . testEqual "mapSet" (sort (toList (mapSet (_ * 2) (fromList [1,2,3])))) [2,4,6]
-  . testEqual "mapSet dedup" (size (mapSet (_ // 2) (fromList [1,2,3,4]))) 3
+  ( testEqual "filterSet" (sort (toList (filterSet (> 2) (fromList [1,2,3,4])))) [3,4]
+  . testEqual "filterSet none" (sort (toList (filterSet (> 9) (fromList [1,2,3])))) ([] :: [Int])
+  . testEqual "filterSet all" (sort (toList (filterSet (> 0) (fromList [1,2,3])))) [1,2,3]
+  . testEqual "mapSet" (sort (toList (mapSet (* 2) (fromList [1,2,3])))) [2,4,6]
+  . testEqual "mapSet dedup" (size (mapSet (// 2) (fromList [1,2,3,4]))) 3
   )
 
 -------------------------------------------------------------------------------
