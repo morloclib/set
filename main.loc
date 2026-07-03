@@ -38,11 +38,6 @@ fromList = pack
 toList :: Set a -> [a]
 toList = unpack
 
--- Query
-
-size :: Set a -> Int
-size = fold (\n x -> n + 1) 0
-
 -- Set-theoretic operations
 
 union :: Set a -> Set a -> Set a
