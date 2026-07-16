@@ -4,7 +4,7 @@ import set
 import root
 
 type Py => Int = "int"
-type Py => UInt64 = "int"
+type Py => U64 = "int"
 type Py => Str = "str"
 type Py => Real = "float"
 type Py => Bool = "bool"
