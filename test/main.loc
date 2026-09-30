@@ -2,62 +2,30 @@ module set.test (test)
 
 import set
 import root
+import unittest
 
-type Py => Int = "int"
-type Py => U64 = "int"
-type Py => Str = "str"
-type Py => Real = "float"
-type Py => Bool = "bool"
-type Py => Tuple2 a b = "tuple" a b
-type Py => List a = "list" a
-
--------------------------------------------------------------------------------
--- Test suite functions
-
-source Py from "set-test.py" ("testEqual", "printMsg", "printResult")
-testEqual
-    :: Str -- description of the test
-    -> a
-    -> a
-    -> (Int, Int) -- total number of tests and total fails
-    -> (Int, Int)
-printMsg :: Str -> a -> a
-printResult :: (Int, Int) -> (Int, Int)
-
-testGroup
-    :: Str
-    -> ((Int, Int) -> (Int, Int))
-    -> (Int, Int)
-    -> (Int, Int)
-testGroup msg tests = tests . printMsg msg
-
-passed :: (Int, Int) -> Bool
-passed t = 0 == (.0 t)
-
-test = runTests (0,0)
+test = suite runTests
 
 -------------------------------------------------------------------------------
 -- Test suite
 
-runTests :: (Int, Int) -> Bool
+runTests :: Test
 runTests =
-  ( passed
-  . printResult
-  . testGroup "Set Monoid" testMonoid
-  . testGroup "Set Semigroup" testSemigroup
-  . testGroup "Set Foldable" testFoldable
-  . testGroup "Set Transform" testTransform
-  . testGroup "Set Predicates" testPredicates
-  . testGroup "Set Operations" testOperations
-  . testGroup "Set Modify" testModify
-  . testGroup "Set Query" testQuery
-  . testGroup "Set Construction" testConstruction
+  ( group "Set Monoid" testMonoid
+  . group "Set Semigroup" testSemigroup
+  . group "Set Foldable" testFoldable
+  . group "Set Transform" testTransform
+  . group "Set Predicates" testPredicates
+  . group "Set Operations" testOperations
+  . group "Set Modify" testModify
+  . group "Set Query" testQuery
+  . group "Set Construction" testConstruction
   )
 
 -------------------------------------------------------------------------------
 -- Construction
 
-testConstruction :: (Int, Int) -> (Int, Int)
+testConstruction :: Test
 testConstruction =
   ( testEqual "fromList" (sort (toList (fromList [3,1,2]))) [1,2,3]
   . testEqual "fromList empty" (sort (toList (fromList ([] :: [Int])))) ([] :: [Int])
@@ -69,7 +37,7 @@ testConstruction =
 -------------------------------------------------------------------------------
 -- Query
 
-testQuery :: (Int, Int) -> (Int, Int)
+testQuery :: Test
 testQuery =
   ( testEqual "member found" (member 2 (fromList [1,2,3])) True
   . testEqual "member missing" (member 4 (fromList [1,2,3])) False
@@ -83,7 +51,7 @@ testQuery =
 -------------------------------------------------------------------------------
 -- Modify
 
-testModify :: (Int, Int) -> (Int, Int)
+testModify :: Test
 testModify =
   ( testEqual "insertSet new" (sort (toList (insertSet 4 (fromList [1,2,3])))) [1,2,3,4]
   . testEqual "insertSet dup" (sort (toList (insertSet 2 (fromList [1,2,3])))) [1,2,3]
@@ -97,7 +65,7 @@ testModify =
 -------------------------------------------------------------------------------
 -- Set Operations
 
-testOperations :: (Int, Int) -> (Int, Int)
+testOperations :: Test
 testOperations =
   ( testEqual "union disjoint" (sort (toList (union (fromList [1,2]) (fromList [3,4])))) [1,2,3,4]
   . testEqual "union overlap" (sort (toList (union (fromList [1,2,3]) (fromList [2,3,4])))) [1,2,3,4]
@@ -118,7 +86,7 @@ testOperations =
 -------------------------------------------------------------------------------
 -- Predicates
 
-testPredicates :: (Int, Int) -> (Int, Int)
+testPredicates :: Test
 testPredicates =
   ( testEqual "isSubset true" (isSubset (fromList [1,2]) (fromList [1,2,3])) True
   . testEqual "isSubset false" (isSubset (fromList [1,4]) (fromList [1,2,3])) False
@@ -132,7 +100,7 @@ testPredicates =
 -------------------------------------------------------------------------------
 -- Transform
 
-testTransform :: (Int, Int) -> (Int, Int)
+testTransform :: Test
 testTransform =
   ( testEqual "filterSet" (sort (toList (filterSet (> 2) (fromList [1,2,3,4])))) [3,4]
   . testEqual "filterSet none" (sort (toList (filterSet (> 9) (fromList [1,2,3])))) ([] :: [Int])
@@ -144,7 +112,7 @@ testTransform =
 -------------------------------------------------------------------------------
 -- Foldable
 
-testFoldable :: (Int, Int) -> (Int, Int)
+testFoldable :: Test
 testFoldable =
   ( testEqual "fold sum" (fold (+) 0 (fromList [1,2,3])) 6
   . testEqual "fold empty" (fold (+) 0 (fromList ([] :: [Int]))) 0
@@ -158,7 +126,7 @@ testFoldable =
 -------------------------------------------------------------------------------
 -- Semigroup
 
-testSemigroup :: (Int, Int) -> (Int, Int)
+testSemigroup :: Test
 testSemigroup =
   ( testEqual "append" (sort (toList ((fromList [1,2]) <> (fromList [2,3])))) [1,2,3]
   . testEqual "append disjoint" (sort (toList ((fromList [1,2]) <> (fromList [3,4])))) [1,2,3,4]
@@ -169,7 +137,7 @@ testSemigroup =
 -------------------------------------------------------------------------------
 -- Monoid
 
-testMonoid :: (Int, Int) -> (Int, Int)
+testMonoid :: Test
 testMonoid =
   ( testEqual "mempty size" (size (mempty :: Set Int)) 0
   . testEqual "mempty toList" (sort (toList (mempty :: Set Int))) ([] :: [Int])
