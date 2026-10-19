@@ -5,7 +5,7 @@ import root
 
 --' An unordered collection of unique elements
 --' metavar: SET
-type Set a
+newtype Set a = [a]
 
 -- Serialization: sets are packed as lists
 instance Packable [a] (Set a)
