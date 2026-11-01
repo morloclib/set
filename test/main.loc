@@ -143,4 +143,6 @@ testMonoid =
   . testEqual "mempty toList" (sort (toList (mempty :: Set Int))) ([] :: [Int])
   . testEqual "append mempty left" (sort (toList (mempty <> (fromList [1,2])))) [1,2]
   . testEqual "append mempty right" (sort (toList ((fromList [1,2]) <> mempty))) [1,2]
+  . testEqual "mconcat" (sort (toList (mconcat [fromList [1,2], fromList [2,3], fromList [5]]))) [1,2,3,5]
+  . testEqual "mconcat empty" (size (mconcat ([] :: [Set Int]))) 0
   )
