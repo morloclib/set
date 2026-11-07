@@ -63,3 +63,7 @@ isDisjoint a b = fold (\acc x -> acc && not (member x b)) True a
 filterSet :: (a -> Bool) -> Set a -> Set a
 
 mapSet :: (a -> b) -> Set a -> Set b
+
+instance Eq (Set a) where
+  (==) x y = isSubset x y && isSubset y x
+  (!=) x y = not (isSubset x y && isSubset y x)
