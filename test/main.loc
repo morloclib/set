@@ -121,6 +121,10 @@ testFoldable =
   . testEqual "fold1 single" (fold1 (+) (fromList [42])) 42
   . testEqual "safeFold1 sum" (safeFold1 (+) (fromList [1,2,3])) 6
   . testEqual "safeFold1 empty" (safeFold1 (+) (fromList ([] :: [Int]))) (Null :: ?Int)
+  . testEqual "length 3" (length (fromList [1,2,3])) 3
+  . testEqual "length dedup" (length (fromList [1,2,1,3,2])) 3
+  . testEqual "length empty" (length (fromList ([] :: [Int]))) 0
+  . testEqual "length Str" (length (fromList ["a","bc","a"])) 2
   )
 
 -------------------------------------------------------------------------------
